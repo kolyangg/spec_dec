@@ -1,0 +1,27 @@
+.venvs/
+external/
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Large/generated homework artifacts.
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/hidden_states/*
+!data/hidden_states/.gitkeep
+models/*
+!models/.gitkeep
+output/*
+!output/.gitkeep
+!output/checkpoints/
+output/checkpoints/*
+!output/checkpoints/.gitkeep
+benchmarks/results/*
+!benchmarks/results/.gitkeep
+
+# Local machine/server configuration.
+.env
+*.log
