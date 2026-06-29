@@ -19,8 +19,6 @@ output/*
 !output/checkpoints/
 output/checkpoints/*
 !output/checkpoints/.gitkeep
-benchmarks/results/*
-!benchmarks/results/.gitkeep
 
 # Large model/checkpoint blobs, in case they are saved outside the standard dirs.
 *.safetensors
