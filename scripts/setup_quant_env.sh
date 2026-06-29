@@ -15,8 +15,13 @@ VENV_DIR="${COMP_VENV:-$VENV_ROOT/comp_venv}"
 echo "Creating quantization environment at $VENV_DIR"
 create_venv "$PYTHON_BIN" "$VENV_DIR"
 
-python -m pip install "llmcompressor==0.12.0"
-python -m pip install --upgrade transformers accelerate safetensors huggingface_hub
+python -m pip install --upgrade \
+  "llmcompressor==0.12.0" \
+  "accelerate>=1.6.0,<=1.13.0" \
+  "transformers>=5.9.0,<=5.10.1" \
+  safetensors \
+  huggingface_hub
+python -m pip check
 register_kernel_if_requested comp_venv "LLM Compressor FP8"
 
 echo
