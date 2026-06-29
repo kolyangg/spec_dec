@@ -17,6 +17,21 @@ create_venv "$PYTHON_BIN" "$VENV_DIR"
 
 python -m pip install "vllm==0.20.0" "fastapi<0.137"
 python -m pip install --upgrade huggingface_hub datasets
+python - <<'PY'
+import sys
+import sysconfig
+from pathlib import Path
+
+header = Path(sysconfig.get_path("include")) / "Python.h"
+if not header.exists():
+    version = f"{sys.version_info.major}.{sys.version_info.minor}"
+    print()
+    print("WARNING: Python development headers were not found.")
+    print(f"Missing: {header}")
+    print("vLLM/Torch may fail at runtime while compiling CUDA helpers.")
+    print("On Ubuntu/Debian, install:")
+    print(f"  sudo apt-get install -y python{version}-dev build-essential")
+PY
 register_kernel_if_requested vllm_venv "vLLM Benchmark"
 
 echo
