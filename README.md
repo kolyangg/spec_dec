@@ -60,9 +60,13 @@ Expected environments:
 
    Benchmark baseline, speculative decoding, FP8, and FP8 + speculative decoding with consistent settings.
 
+5. [Final Notebook Work](_instructions/5.final_notebook_work.md)
+
+   Collect benchmark blocks, training metrics, quantization evidence, and written answers for the final notebook submission.
+
 ## Final Notebook Work
 
-Fill `spec_dec+quantization_homework.ipynb` with:
+Follow [step 5](_instructions/5.final_notebook_work.md) to fill `spec_dec+quantization_homework.ipynb` with:
 
 - speculative decoding benchmark output;
 - FP8 quantization benchmark output;
@@ -91,4 +95,3 @@ models/
 output/checkpoints/
 benchmarks/results/
 ```
-
