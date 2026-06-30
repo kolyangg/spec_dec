@@ -38,7 +38,15 @@ RUN_FP8="${RUN_FP8:-1}"
 RUN_FP8_SPEC="${RUN_FP8_SPEC:-1}"
 SERVER_READY_TIMEOUT="${SERVER_READY_TIMEOUT:-900}"
 ALLOW_EXISTING_SERVER="${ALLOW_EXISTING_SERVER:-0}"
+BENCH_RETRIES="${BENCH_RETRIES:-3}"
+BENCH_RETRY_SLEEP="${BENCH_RETRY_SLEEP:-30}"
 SERVER_PID=""
+
+# vLLM's HF benchmark dataset loader can occasionally time out while reading
+# HuggingFace metadata. Longer HF timeouts plus benchmark-level retries make the
+# sweep resumable without changing the measured workload.
+export HF_HUB_ETAG_TIMEOUT="${HF_HUB_ETAG_TIMEOUT:-60}"
+export HF_HUB_DOWNLOAD_TIMEOUT="${HF_HUB_DOWNLOAD_TIMEOUT:-60}"
 
 print_run_context
 echo "Base model:  $BASE_MODEL"
@@ -128,23 +136,45 @@ run_bench() {
   local model_name="$2"
   local prompts="$3"
   local concurrency="$4"
+  local attempt
+  local result_json="$BENCH_DIR/${label}.json"
+  local result_txt="$BENCH_DIR/${label}.txt"
+
+  if [[ -s "$result_json" ]]; then
+    echo "Skipping $label: existing result $result_json"
+    return 0
+  fi
 
   echo "Benchmark $label: prompts=$prompts concurrency=$concurrency"
-  vllm bench serve \
-    --backend openai \
-    --host "$HOST" \
-    --port "$PORT" \
-    --model "$model_name" \
-    --dataset-name hf \
-    --dataset-path philschmid/mt-bench \
-    --num-prompts "$prompts" \
-    --max-concurrency "$concurrency" \
-    --ignore-eos \
-    --seed 0 \
-    --save-result \
-    --result-dir "$BENCH_DIR" \
-    --result-filename "${label}.json" \
-    2>&1 | tee "$BENCH_DIR/${label}.txt"
+  for attempt in $(seq 1 "$BENCH_RETRIES"); do
+    rm -f "$result_json" "$result_txt"
+    echo "Attempt $attempt/$BENCH_RETRIES for $label"
+    if vllm bench serve \
+      --backend openai \
+      --host "$HOST" \
+      --port "$PORT" \
+      --model "$model_name" \
+      --dataset-name hf \
+      --dataset-path philschmid/mt-bench \
+      --num-prompts "$prompts" \
+      --max-concurrency "$concurrency" \
+      --ignore-eos \
+      --seed 0 \
+      --save-result \
+      --result-dir "$BENCH_DIR" \
+      --result-filename "${label}.json" \
+      2>&1 | tee "$result_txt"; then
+      return 0
+    fi
+
+    if (( attempt < BENCH_RETRIES )); then
+      echo "Benchmark $label failed; retrying in ${BENCH_RETRY_SLEEP}s"
+      sleep "$BENCH_RETRY_SLEEP"
+    fi
+  done
+
+  echo "Benchmark $label failed after $BENCH_RETRIES attempts" >&2
+  return 1
 }
 
 warmup() {

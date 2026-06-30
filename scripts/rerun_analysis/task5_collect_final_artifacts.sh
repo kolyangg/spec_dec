@@ -16,7 +16,9 @@ if compgen -G "$BENCH_DIR/*.json" >/dev/null; then
     --metrics-dir "$METRICS_DIR" \
     --results-md "$METRICS_DIR/RESULTS_TUNED.md"
 else
-  echo "No benchmark JSON files found in $BENCH_DIR; skipping benchmark aggregation." >&2
+  echo "No benchmark JSON files found in $BENCH_DIR." >&2
+  echo "Run task4_benchmark_sweep.sh successfully before collecting final artifacts." >&2
+  exit 1
 fi
 
 {

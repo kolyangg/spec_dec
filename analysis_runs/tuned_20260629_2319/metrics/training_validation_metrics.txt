@@ -1,0 +1,26 @@
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:[19:13:44] INFO     val/loss_0_epoch=3.059, val/full_acc_0_epoch=0.394, val/cond_acc_0_epoch=0.394,         trainer.py:264
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_1_epoch=4.320, val/full_acc_1_epoch=0.124, val/cond_acc_1_epoch=0.296,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_2_epoch=5.021, val/full_acc_2_epoch=0.035, val/cond_acc_2_epoch=0.248,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_epoch=12.400, epoch=0                                                                        
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:[19:15:22] INFO     val/loss_0_epoch=2.633, val/full_acc_0_epoch=0.449, val/cond_acc_0_epoch=0.449,         trainer.py:264
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_1_epoch=3.897, val/full_acc_1_epoch=0.165, val/cond_acc_1_epoch=0.346,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_2_epoch=4.639, val/full_acc_2_epoch=0.056, val/cond_acc_2_epoch=0.299,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_epoch=11.169, epoch=1                                                                        
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:[19:17:01] INFO     val/loss_0_epoch=2.540, val/full_acc_0_epoch=0.460, val/cond_acc_0_epoch=0.460,         trainer.py:264
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_1_epoch=3.809, val/full_acc_1_epoch=0.176, val/cond_acc_1_epoch=0.360,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_2_epoch=4.572, val/full_acc_2_epoch=0.064, val/cond_acc_2_epoch=0.313,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_epoch=10.921, epoch=2                                                                        
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:[19:18:40] INFO     val/loss_0_epoch=2.539, val/full_acc_0_epoch=0.461, val/cond_acc_0_epoch=0.461,         trainer.py:264
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_1_epoch=3.817, val/full_acc_1_epoch=0.177, val/cond_acc_1_epoch=0.361,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_2_epoch=4.584, val/full_acc_2_epoch=0.064, val/cond_acc_2_epoch=0.315,                       
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_epoch=10.940, epoch=3                                                                        
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:[19:20:16] INFO     val/loss_0_epoch=2.510,                           trainer.py:264
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/full_acc_0_epoch=0.466,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/cond_acc_0_epoch=0.466,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_1_epoch=3.780,                                         
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/full_acc_1_epoch=0.182,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/cond_acc_1_epoch=0.365,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_2_epoch=4.549,                                         
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/full_acc_2_epoch=0.069,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/cond_acc_2_epoch=0.322,                                     
+/home/niko/neb/spec_dec/output/logs/eagle3_qwen3_8b_3k_seq2048/train.log:                    val/loss_epoch=10.839, epoch=4                                  

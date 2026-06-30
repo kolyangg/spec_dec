@@ -18,6 +18,8 @@ Set a run id once in every terminal that participates in the rerun:
 export RUN_ID="tuned_$(date +%Y%m%d_%H%M)"
 ```
 
+The scripts always save rerun outputs under `analysis_runs/$RUN_ID` by default, even if your shell still has old `BENCH_DIR` or `LOG_DIR` variables from manual benchmarking. For intentional overrides, use `RERUN_RUN_DIR`, `RERUN_LOG_DIR`, `RERUN_METRICS_DIR`, or `RERUN_BENCH_DIR`.
+
 ## Fast Path: Benchmark Tuning First
 
 Use this before regenerating hidden states or retraining. It checks the FP8 model and reruns the serving benchmark with higher load, warmups, fixed output lengths, and concurrency sweeps.
@@ -26,8 +28,8 @@ Use this before regenerating hidden states or retraining. It checks the FP8 mode
 cd /home/niko/neb/spec_dec
 export RUN_ID="tuned_$(date +%Y%m%d_%H%M)"
 
-bash scripts/rerun_analysis/task3_quantize_or_verify_fp8.sh
-bash scripts/rerun_analysis/task4_benchmark_sweep.sh
+bash scripts/rerun_analysis/task3_quantize_or_verify_fp8.sh && \
+bash scripts/rerun_analysis/task4_benchmark_sweep.sh && \
 bash scripts/rerun_analysis/task5_collect_final_artifacts.sh
 ```
 
@@ -81,9 +83,9 @@ Stop Terminal A after hidden-state generation finishes.
 Then train the stronger draft head and rerun benchmarks:
 
 ```bash
-bash scripts/rerun_analysis/task2_train_stronger_eagle3.sh
-bash scripts/rerun_analysis/task3_quantize_or_verify_fp8.sh
-bash scripts/rerun_analysis/task4_benchmark_sweep.sh
+bash scripts/rerun_analysis/task2_train_stronger_eagle3.sh && \
+bash scripts/rerun_analysis/task3_quantize_or_verify_fp8.sh && \
+bash scripts/rerun_analysis/task4_benchmark_sweep.sh && \
 bash scripts/rerun_analysis/task5_collect_final_artifacts.sh
 ```
 

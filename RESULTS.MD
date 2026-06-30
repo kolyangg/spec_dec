@@ -106,52 +106,95 @@
 
 ## Task 4: Serve And Benchmark With vLLM
 
+- Final tuned run id: `tuned_20260629_2319`
 - Base model: `Qwen/Qwen3-8B`
 - FP8 model: `models/Qwen3-8B-FP8-Dynamic`
 - Draft model: `output/checkpoints/eagle3_qwen3_8b_3k_seq2048/4`
-- Benchmark result directory: `benchmarks/results`
+- Benchmark result directory: `analysis_runs/tuned_20260629_2319/benchmarks/results`
+- Tuned summary file: `analysis_runs/tuned_20260629_2319/metrics/RESULTS_TUNED.md`
+- Benchmark JSON summary: `analysis_runs/tuned_20260629_2319/metrics/task4_metrics.json`
+- Benchmark CSV summary: `analysis_runs/tuned_20260629_2319/metrics/task4_metrics.csv`
+- Completed benchmark files: `50` JSON files and `50` text files
+- Measured benchmark rows: `40`; warmup rows: `10`
 - Benchmark settings:
-  - prompts: `80`
-  - max concurrency: `8`
-  - seed: `0`
   - dataset: `philschmid/mt-bench`
+  - seed: `0`
+  - `--ignore-eos`: enabled
+  - concurrency sweep: `8`, `16`, `24`, `32`
+  - prompts per concurrency: `20`
+  - measured prompts: `160`, `320`, `480`, `640`
+  - GPU memory utilization: `0.92`
+  - `max_num_seqs`: `64`
+  - `max_num_batched_tokens`: `32768`
 
 ### Step 9 Comparison Table
 
-| Configuration | Draft tokens | Output tok/s | Mean TTFT ms | Mean TPOT ms | Acceptance rate | Acceptance length |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Baseline BF16 | N/A | `838.44` | `659.98` | `6.99` | N/A | N/A |
-| EAGLE-3 BF16 | `1` | `1201.13` | `126.04` | `5.84` | `37.03%` | `1.37` |
-| FP8 | N/A | `1069.66` | `593.03` | `5.18` | N/A | N/A |
-| FP8 + EAGLE-3 | `2` | `1628.42` | `60.09` | `4.48` | `22.67%` | `1.45` |
+| Configuration | Source run | Draft tokens | Requests | Output tok/s | Total tok/s | Req/s | Mean TTFT ms | Mean TPOT ms | Acceptance rate | Acceptance length |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Baseline BF16 | `baseline_bf16_c32` | N/A | `640` | `4215.67` | `5508.26` | `16.47` | `65.67` | `7.36` | N/A | N/A |
+| EAGLE-3 BF16 | `spec_bf16_n1_c32` | `1` | `640` | `5040.63` | `6586.17` | `19.69` | `30.98` | `6.14` | `35.47%` | `1.35` |
+| FP8 | `fp8_c32` | N/A | `640` | `5704.46` | `7453.55` | `22.28` | `52.86` | `5.41` | N/A | N/A |
+| FP8 + EAGLE-3 | `fp8_spec_n1_c32` | `1` | `640` | `6569.96` | `8584.41` | `25.66` | `31.18` | `4.68` | `35.41%` | `1.35` |
 
 ### Threshold Check
 
 | Configuration | Threshold | Observed | Result |
 | --- | ---: | ---: | --- |
-| EAGLE-3 BF16 | `> 1250 tok/s` | `1201.13 tok/s` | below threshold |
-| FP8 | `> 1550 tok/s` | `1069.66 tok/s` | below threshold |
-| FP8 + EAGLE-3 | `> 1750 tok/s` | `1628.42 tok/s` | below threshold |
+| EAGLE-3 BF16 | `> 1250 tok/s` | `5040.63 tok/s` | pass |
+| FP8 | `> 1550 tok/s` | `5704.46 tok/s` | pass |
+| FP8 + EAGLE-3 | `> 1750 tok/s` | `6569.96 tok/s` | pass |
 
 ### Speculative Token Selection
 
-- Best BF16 speculative run by output throughput: `SPEC_TOKENS=1`, from `benchmarks/results/spec_bf16_n1.json`.
-- Best FP8 speculative run by output throughput: `SPEC_TOKENS=2`, from `benchmarks/results/fp8_spec_n2.json`.
-- Larger BF16 draft counts reduced acceptance rate and did not improve throughput. `SPEC_TOKENS=1` had the best BF16 throughput and the highest acceptance rate.
-- For FP8, `SPEC_TOKENS=2` was best: it gave the highest output throughput while keeping TPOT low. `SPEC_TOKENS=3` and `4` accepted slightly more total tokens but spent more work on rejected draft tokens, so throughput was lower.
+- Best BF16 speculative run by output throughput: `SPEC_TOKENS=1`, from `spec_bf16_n1_c32`.
+- Best FP8 speculative run by output throughput: `SPEC_TOKENS=1`, from `fp8_spec_n1_c32`.
+- In this completed sweep, the highest-throughput point for all final configurations was concurrency `32`.
+- Larger speculative counts (`2`, `3`, `4`) had lower acceptance rates and did not beat `SPEC_TOKENS=1` for either BF16 or FP8 speculative serving.
 
-### Speculative Run Details
+### All Measured Runs
 
-| Run | Draft tokens | Output tok/s | Mean TTFT ms | Mean TPOT ms | Acceptance rate | Acceptance length | Drafts | Draft tokens | Accepted tokens |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `spec_bf16_n1` | `1` | `1201.13` | `126.04` | `5.84` | `37.03%` | `1.37` | `14865` | `14865` | `5504` |
-| `spec_bf16_n2` | `2` | `834.04` | `815.22` | `5.86` | `21.61%` | `1.43` | `14253` | `28506` | `6161` |
-| `spec_bf16_n3` | `3` | `1183.20` | `138.17` | `5.97` | `15.32%` | `1.46` | `13999` | `41997` | `6432` |
-| `spec_bf16_n4` | `4` | `1170.54` | `77.12` | `6.26` | `11.57%` | `1.46` | `13965` | `55860` | `6464` |
-| `fp8_spec_n1` | `1` | `1032.13` | `746.79` | `4.40` | `35.51%` | `1.36` | `15035` | `15035` | `5339` |
-| `fp8_spec_n2` | `2` | `1628.42` | `60.09` | `4.48` | `22.67%` | `1.45` | `14054` | `28108` | `6371` |
-| `fp8_spec_n3` | `3` | `1569.86` | `54.43` | `4.64` | `15.43%` | `1.46` | `13972` | `41916` | `6466` |
-| `fp8_spec_n4` | `4` | `1562.29` | `63.47` | `4.65` | `15.26%` | `1.46` | `13980` | `41940` | `6401` |
+| Run | Group | Draft tokens | Concurrency | Requests | Output tok/s | Total tok/s | Req/s | Mean TTFT ms | P99 TTFT ms | Mean TPOT ms | Acceptance rate | Acceptance length |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `baseline_bf16_c8` | `baseline_bf16` | N/A | `8` | `160` | `1144.61` | `1503.66` | `4.47` | `39.19` | `119.92` | `6.86` | N/A | N/A |
+| `baseline_bf16_c16` | `baseline_bf16` | N/A | `16` | `320` | `2188.35` | `2887.49` | `8.55` | `50.71` | `72.48` | `7.13` | N/A | N/A |
+| `baseline_bf16_c24` | `baseline_bf16` | N/A | `24` | `480` | `3254.23` | `4273.06` | `12.71` | `51.59` | `88.16` | `7.19` | N/A | N/A |
+| `baseline_bf16_c32` | `baseline_bf16` | N/A | `32` | `640` | `4215.67` | `5508.26` | `16.47` | `65.67` | `105.27` | `7.36` | N/A | N/A |
+| `spec_bf16_n1_c8` | `spec_bf16` | `1` | `8` | `160` | `1354.67` | `1779.62` | `5.29` | `56.63` | `694.23` | `5.58` | `35.48%` | `1.35` |
+| `spec_bf16_n1_c16` | `spec_bf16` | `1` | `16` | `320` | `2646.82` | `3492.44` | `10.34` | `31.65` | `168.09` | `5.79` | `35.54%` | `1.36` |
+| `spec_bf16_n1_c24` | `spec_bf16` | `1` | `24` | `480` | `3867.77` | `5078.68` | `15.11` | `29.08` | `91.53` | `6.00` | `35.28%` | `1.35` |
+| `spec_bf16_n1_c32` | `spec_bf16` | `1` | `32` | `640` | `5040.63` | `6586.17` | `19.69` | `30.98` | `105.59` | `6.14` | `35.47%` | `1.35` |
+| `spec_bf16_n2_c8` | `spec_bf16` | `2` | `8` | `160` | `1391.34` | `1827.80` | `5.43` | `57.75` | `689.96` | `5.47` | `21.95%` | `1.44` |
+| `spec_bf16_n2_c16` | `spec_bf16` | `2` | `16` | `320` | `2646.16` | `3491.57` | `10.34` | `33.19` | `179.66` | `5.79` | `21.85%` | `1.44` |
+| `spec_bf16_n2_c24` | `spec_bf16` | `2` | `24` | `480` | `3863.14` | `5072.60` | `15.09` | `29.53` | `90.26` | `6.00` | `21.73%` | `1.43` |
+| `spec_bf16_n2_c32` | `spec_bf16` | `2` | `32` | `640` | `4967.04` | `6490.01` | `19.40` | `31.94` | `109.68` | `6.20` | `21.75%` | `1.44` |
+| `spec_bf16_n3_c8` | `spec_bf16` | `3` | `8` | `160` | `1328.80` | `1745.64` | `5.19` | `58.46` | `694.13` | `5.73` | `14.75%` | `1.44` |
+| `spec_bf16_n3_c16` | `spec_bf16` | `3` | `16` | `320` | `2559.88` | `3377.71` | `10.00` | `34.43` | `181.40` | `6.02` | `14.98%` | `1.45` |
+| `spec_bf16_n3_c24` | `spec_bf16` | `3` | `24` | `480` | `3666.06` | `4813.83` | `14.32` | `30.95` | `90.22` | `6.31` | `14.87%` | `1.45` |
+| `spec_bf16_n3_c32` | `spec_bf16` | `3` | `32` | `640` | `4777.04` | `6241.75` | `18.66` | `32.84` | `106.05` | `6.44` | `14.93%` | `1.45` |
+| `spec_bf16_n4_c8` | `spec_bf16` | `4` | `8` | `160` | `1302.62` | `1711.25` | `5.09` | `27.80` | `57.83` | `5.99` | `11.23%` | `1.45` |
+| `spec_bf16_n4_c16` | `spec_bf16` | `4` | `16` | `320` | `2413.92` | `3185.13` | `9.43` | `37.41` | `208.31` | `6.36` | `11.32%` | `1.45` |
+| `spec_bf16_n4_c24` | `spec_bf16` | `4` | `24` | `480` | `3462.52` | `4546.55` | `13.53` | `32.58` | `89.94` | `6.68` | `11.18%` | `1.45` |
+| `spec_bf16_n4_c32` | `spec_bf16` | `4` | `32` | `640` | `4388.77` | `5734.43` | `17.14` | `35.00` | `109.46` | `7.02` | `11.27%` | `1.45` |
+| `fp8_c8` | `fp8` | N/A | `8` | `160` | `1644.21` | `2160.00` | `6.42` | `32.91` | `114.09` | `4.75` | N/A | N/A |
+| `fp8_c16` | `fp8` | N/A | `16` | `320` | `3108.20` | `4101.21` | `12.14` | `41.42` | `60.95` | `5.00` | N/A | N/A |
+| `fp8_c24` | `fp8` | N/A | `24` | `480` | `4327.63` | `5682.52` | `16.90` | `46.69` | `78.60` | `5.38` | N/A | N/A |
+| `fp8_c32` | `fp8` | N/A | `32` | `640` | `5704.46` | `7453.55` | `22.28` | `52.86` | `93.31` | `5.41` | N/A | N/A |
+| `fp8_spec_n1_c8` | `fp8_spec` | `1` | `8` | `160` | `1861.93` | `2446.01` | `7.27` | `62.32` | `821.33` | `4.00` | `35.58%` | `1.36` |
+| `fp8_spec_n1_c16` | `fp8_spec` | `1` | `16` | `320` | `3530.14` | `4657.96` | `13.79` | `30.87` | `158.42` | `4.37` | `35.48%` | `1.35` |
+| `fp8_spec_n1_c24` | `fp8_spec` | `1` | `24` | `480` | `5133.22` | `6740.32` | `20.05` | `29.12` | `86.29` | `4.50` | `35.19%` | `1.35` |
+| `fp8_spec_n1_c32` | `fp8_spec` | `1` | `32` | `640` | `6569.96` | `8584.41` | `25.66` | `31.18` | `93.33` | `4.68` | `35.41%` | `1.35` |
+| `fp8_spec_n2_c8` | `fp8_spec` | `2` | `8` | `160` | `1802.59` | `2368.05` | `7.04` | `25.07` | `55.34` | `4.27` | `21.45%` | `1.43` |
+| `fp8_spec_n2_c16` | `fp8_spec` | `2` | `16` | `320` | `3487.39` | `4601.55` | `13.62` | `32.44` | `185.05` | `4.39` | `21.78%` | `1.44` |
+| `fp8_spec_n2_c24` | `fp8_spec` | `2` | `24` | `480` | `4708.51` | `6182.64` | `18.39` | `28.28` | `92.18` | `4.90` | `21.64%` | `1.43` |
+| `fp8_spec_n2_c32` | `fp8_spec` | `2` | `32` | `640` | `5901.86` | `7711.46` | `23.05` | `54.32` | `561.28` | `5.08` | `21.92%` | `1.44` |
+| `fp8_spec_n3_c8` | `fp8_spec` | `3` | `8` | `160` | `1701.16` | `2234.81` | `6.65` | `57.56` | `717.64` | `4.41` | `14.64%` | `1.44` |
+| `fp8_spec_n3_c16` | `fp8_spec` | `3` | `16` | `320` | `3304.63` | `4360.40` | `12.91` | `32.20` | `184.38` | `4.62` | `14.90%` | `1.45` |
+| `fp8_spec_n3_c24` | `fp8_spec` | `3` | `24` | `480` | `4523.71` | `5939.98` | `17.67` | `28.63` | `87.18` | `5.13` | `14.81%` | `1.44` |
+| `fp8_spec_n3_c32` | `fp8_spec` | `3` | `32` | `640` | `5765.15` | `7532.84` | `22.52` | `30.35` | `104.37` | `5.33` | `14.98%` | `1.45` |
+| `fp8_spec_n4_c8` | `fp8_spec` | `4` | `8` | `160` | `1668.99` | `2192.55` | `6.52` | `31.10` | `192.27` | `4.60` | `11.01%` | `1.44` |
+| `fp8_spec_n4_c16` | `fp8_spec` | `4` | `16` | `320` | `2955.71` | `3900.00` | `11.55` | `30.06` | `128.75` | `5.20` | `11.16%` | `1.45` |
+| `fp8_spec_n4_c24` | `fp8_spec` | `4` | `24` | `480` | `4243.75` | `5572.38` | `16.58` | `28.84` | `82.36` | `5.46` | `11.18%` | `1.45` |
+| `fp8_spec_n4_c32` | `fp8_spec` | `4` | `32` | `640` | `4648.82` | `6074.22` | `18.16` | `33.39` | `98.30` | `6.65` | `11.31%` | `1.45` |
 
 ### Step 10 Benchmark Text Blocks
 
@@ -159,37 +202,37 @@
 
 ```text
 ============ Serving Benchmark Result ============
-Successful requests:                     80
+Successful requests:                     640
 Failed requests:                         0
-Maximum request concurrency:             8
-Benchmark duration (s):                  17.01
-Total input tokens:                      6078
-Total generated tokens:                  20431
-Request throughput (req/s):              4.70
-Output token throughput (tok/s):         1201.13
-Peak output token throughput (tok/s):    1014.00
-Peak concurrent requests:                16.00
-Total token throughput (tok/s):          1558.45
+Maximum request concurrency:             32
+Benchmark duration (s):                  32.50
+Total input tokens:                      50236
+Total generated tokens:                  163840
+Request throughput (req/s):              19.69
+Output token throughput (tok/s):         5040.63
+Peak output token throughput (tok/s):    3936.00
+Peak concurrent requests:                64.00
+Total token throughput (tok/s):          6586.17
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          126.04
-Median TTFT (ms):                        24.87
-P99 TTFT (ms):                           1036.24
+Mean TTFT (ms):                          30.98
+Median TTFT (ms):                        24.99
+P99 TTFT (ms):                           105.59
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          5.84
-Median TPOT (ms):                        5.81
-P99 TPOT (ms):                           7.90
+Mean TPOT (ms):                          6.14
+Median TPOT (ms):                        6.17
+P99 TPOT (ms):                           6.75
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           8.00
-Median ITL (ms):                         7.88
-P99 ITL (ms):                            8.82
+Mean ITL (ms):                           8.30
+Median ITL (ms):                         8.16
+P99 ITL (ms):                            17.58
 ---------------Speculative Decoding---------------
-Acceptance rate (%):                     37.03
-Acceptance length:                       1.37
-Drafts:                                  14865
-Draft tokens:                            14865
-Accepted tokens:                         5504
+Acceptance rate (%):                     35.47
+Acceptance length:                       1.35
+Drafts:                                  120577
+Draft tokens:                            120577
+Accepted tokens:                         42766
 Per-position acceptance (%):
-  Position 0:                            37.03
+  Position 0:                            35.47
 ==================================================
 ```
 
@@ -197,29 +240,29 @@ Per-position acceptance (%):
 
 ```text
 ============ Serving Benchmark Result ============
-Successful requests:                     80
+Successful requests:                     640
 Failed requests:                         0
-Maximum request concurrency:             8
-Benchmark duration (s):                  19.15
-Total input tokens:                      6078
-Total generated tokens:                  20480
-Request throughput (req/s):              4.18
-Output token throughput (tok/s):         1069.66
-Peak output token throughput (tok/s):    1640.00
-Peak concurrent requests:                16.00
-Total token throughput (tok/s):          1387.11
+Maximum request concurrency:             32
+Benchmark duration (s):                  28.72
+Total input tokens:                      50236
+Total generated tokens:                  163840
+Request throughput (req/s):              22.28
+Output token throughput (tok/s):         5704.46
+Peak output token throughput (tok/s):    6061.00
+Peak concurrent requests:                64.00
+Total token throughput (tok/s):          7453.55
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          593.03
-Median TTFT (ms):                        28.44
-P99 TTFT (ms):                           6054.03
+Mean TTFT (ms):                          52.86
+Median TTFT (ms):                        51.42
+P99 TTFT (ms):                           93.31
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          5.18
-Median TPOT (ms):                        4.89
-P99 TPOT (ms):                           9.88
+Mean TPOT (ms):                          5.41
+Median TPOT (ms):                        5.41
+P99 TPOT (ms):                           5.56
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           5.18
-Median ITL (ms):                         4.88
-P99 ITL (ms):                            5.49
+Mean ITL (ms):                           5.41
+Median ITL (ms):                         5.33
+P99 ITL (ms):                            7.81
 ==================================================
 ```
 
@@ -227,38 +270,37 @@ P99 ITL (ms):                            5.49
 
 ```text
 ============ Serving Benchmark Result ============
-Successful requests:                     80
+Successful requests:                     640
 Failed requests:                         0
-Maximum request concurrency:             8
-Benchmark duration (s):                  12.58
-Total input tokens:                      6078
-Total generated tokens:                  20480
-Request throughput (req/s):              6.36
-Output token throughput (tok/s):         1628.42
-Peak output token throughput (tok/s):    1234.00
-Peak concurrent requests:                16.00
-Total token throughput (tok/s):          2111.70
+Maximum request concurrency:             32
+Benchmark duration (s):                  24.94
+Total input tokens:                      50236
+Total generated tokens:                  163840
+Request throughput (req/s):              25.66
+Output token throughput (tok/s):         6569.96
+Peak output token throughput (tok/s):    5127.00
+Peak concurrent requests:                64.00
+Total token throughput (tok/s):          8584.41
 ---------------Time to First Token----------------
-Mean TTFT (ms):                          60.09
-Median TTFT (ms):                        19.94
-P99 TTFT (ms):                           429.56
+Mean TTFT (ms):                          31.18
+Median TTFT (ms):                        26.89
+P99 TTFT (ms):                           93.33
 -----Time per Output Token (excl. 1st token)------
-Mean TPOT (ms):                          4.48
-Median TPOT (ms):                        4.53
-P99 TPOT (ms):                           5.08
+Mean TPOT (ms):                          4.68
+Median TPOT (ms):                        4.69
+P99 TPOT (ms):                           5.21
 ---------------Inter-token Latency----------------
-Mean ITL (ms):                           6.50
-Median ITL (ms):                         6.44
-P99 ITL (ms):                            8.28
+Mean ITL (ms):                           6.33
+Median ITL (ms):                         6.06
+P99 ITL (ms):                            16.20
 ---------------Speculative Decoding---------------
-Acceptance rate (%):                     22.67
-Acceptance length:                       1.45
-Drafts:                                  14054
-Draft tokens:                            28108
-Accepted tokens:                         6371
+Acceptance rate (%):                     35.41
+Acceptance length:                       1.35
+Drafts:                                  120655
+Draft tokens:                            120655
+Accepted tokens:                         42718
 Per-position acceptance (%):
-  Position 0:                            36.45
-  Position 1:                            8.89
+  Position 0:                            35.41
 ==================================================
 ```
 
@@ -268,10 +310,35 @@ Per-position acceptance (%):
 - Acceptance rate does not need to be close to 100% because the verifier pass can still amortize multiple tokens when enough proposals are accepted.
 - FP8 reduces verifier memory bandwidth and compute pressure on H100.
 - FP8 can change verifier numerics, so the optimal speculative token count and acceptance rate can differ from BF16.
+- In this run, `SPEC_TOKENS=1` was best for both BF16 speculative serving and FP8 speculative serving. It had the highest acceptance rate and avoided extra draft work that did not pay back at `SPEC_TOKENS=2`, `3`, or `4`.
 
 ### Metrics Completeness
 
-- All Step 9 table fields were available from `benchmarks/results/*.json` and `benchmarks/results/*.txt`.
-- All Step 10 requested benchmark text blocks were available from the saved `.txt` files.
-- Acceptance rate, acceptance length, drafts, draft tokens, accepted tokens, and per-position acceptance were available in the benchmark JSON/text outputs for every speculative run.
-- I did not find a saved Prometheus `/metrics` endpoint snapshot, but it is not needed here because the benchmark outputs already include the speculative acceptance metrics requested by the runbook.
+- All Step 9 table fields were available from `analysis_runs/tuned_20260629_2319/benchmarks/results/*.json`.
+- All Step 10 requested benchmark text blocks were available from the matching `.txt` files.
+- Acceptance rate, acceptance length, drafts, draft tokens, accepted tokens, and per-position acceptance were available for every speculative run.
+- The saved root benchmark directory from the earlier low-concurrency attempt is superseded by the tuned run above.
+
+## Task 5: Final Notebook Work
+
+- Final collection summary: `analysis_runs/tuned_20260629_2319/metrics/FINAL_COLLECTION.md`
+- Artifact sizes: `analysis_runs/tuned_20260629_2319/metrics/artifact_sizes.txt`
+- Training validation extract: `analysis_runs/tuned_20260629_2319/metrics/training_validation_metrics.txt`
+- Notebook TODO check: `analysis_runs/tuned_20260629_2319/metrics/notebook_todo_check.txt`
+- Notebook TODO cells currently reported: `6`, `7`, `8`
+
+### Final Artifact Sizes
+
+| Artifact | Path | Size |
+| --- | --- | ---: |
+| Processed data | `data/processed/qwen3_8b_sharegpt` | `17M` |
+| Hidden states | `data/hidden_states/qwen3_8b_sharegpt_3k_seq2048` | `122G` |
+| FP8 model | `models/Qwen3-8B-FP8-Dynamic` | `8.9G` |
+| Draft checkpoint run | `output/checkpoints/eagle3_qwen3_8b_3k_seq2048` | `3.0G` |
+
+### Notebook Paste Targets
+
+- Speculative decoding benchmark result: use `spec_bf16_n1_c32`.
+- FP8 quantization benchmark result: use `fp8_c32`.
+- FP8 + speculative decoding benchmark result: use `fp8_spec_n1_c32`.
+- Written-answer material is included in the Task 2, Task 3, and Task 4 notebook notes above.

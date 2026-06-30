@@ -1,0 +1,13 @@
+# Artifact Sizes
+
+## Processed Data
+17M	/home/niko/neb/spec_dec/data/processed/qwen3_8b_sharegpt
+
+## Hidden States
+122G	/home/niko/neb/spec_dec/data/hidden_states/qwen3_8b_sharegpt_3k_seq2048
+
+## Models
+8.9G	/home/niko/neb/spec_dec/models/Qwen3-8B-FP8-Dynamic
+
+## Checkpoints
+3.0G	/home/niko/neb/spec_dec/output/checkpoints/eagle3_qwen3_8b_3k_seq2048

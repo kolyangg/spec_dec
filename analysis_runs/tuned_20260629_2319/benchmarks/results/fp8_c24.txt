@@ -1,0 +1,39 @@
+INFO 06-29 23:45:07 [nixl_utils.py:20] Setting UCX_RCACHE_MAX_UNRELEASED to '1024' to avoid a rare memory leak in UCX when using NIXL.
+WARNING 06-29 23:45:07 [nixl_utils.py:34] NIXL is not available
+WARNING 06-29 23:45:07 [nixl_utils.py:44] NIXL agent config is not available
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7bd4252884a0>, trust_remote_code=False, seed=0, num_prompts=480, dataset_name='hf', no_stream=False, dataset_path='philschmid/mt-bench', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/completions', header=None, max_concurrency=24, model='/home/niko/neb/spec_dec/models/Qwen3-8B-FP8-Dynamic', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/home/niko/neb/spec_dec/analysis_runs/tuned_20260629_2319/benchmarks/results', result_filename='fp8_c24.json', ignore_eos=True, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-2693200f-', top_p=None, top_k=None, min_p=None, temperature=None, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+INFO 06-29 23:45:11 [datasets.py:307] Oversampled requests to reach 480 total samples.
+WARNING: vllm bench serve no longer sets temperature==0 (greedy) in requests by default. The default will be determined on the server side and can be model/API specific. For the old behavior, include --temperature=0.
+Starting initial single prompt test run...
+Skipping endpoint ready check.
+Starting main benchmark run...
+Traffic request rate: inf
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: 24
+  0%|          | 0/480 [00:00<?, ?it/s]  0%|          | 1/480 [00:01<11:26,  1.43s/it]  5%|▌         | 25/480 [00:02<00:44, 10.25it/s] 10%|█         | 49/480 [00:04<00:32, 13.40it/s] 15%|█▌        | 73/480 [00:05<00:27, 14.74it/s] 20%|██        | 97/480 [00:07<00:24, 15.64it/s] 25%|██▌       | 121/480 [00:08<00:22, 16.07it/s] 30%|███       | 145/480 [00:09<00:20, 16.32it/s] 35%|███▌      | 169/480 [00:11<00:18, 16.52it/s] 40%|████      | 193/480 [00:12<00:17, 16.65it/s] 45%|████▍     | 214/480 [00:12<00:11, 22.56it/s] 46%|████▋     | 222/480 [00:14<00:16, 16.11it/s] 50%|█████     | 241/480 [00:15<00:15, 15.66it/s] 51%|█████▏    | 246/480 [00:15<00:13, 16.85it/s] 55%|█████▌    | 265/480 [00:16<00:13, 15.98it/s] 56%|█████▌    | 269/480 [00:17<00:12, 16.93it/s] 60%|██████    | 289/480 [00:18<00:11, 16.28it/s] 61%|██████    | 293/480 [00:18<00:10, 17.22it/s] 65%|██████▌   | 313/480 [00:19<00:10, 16.44it/s] 66%|██████▌   | 317/480 [00:19<00:09, 17.35it/s] 70%|███████   | 337/480 [00:21<00:08, 16.44it/s] 71%|███████   | 341/480 [00:21<00:08, 17.33it/s] 75%|███████▌  | 361/480 [00:22<00:07, 16.56it/s] 76%|███████▌  | 365/480 [00:22<00:06, 17.41it/s] 80%|████████  | 385/480 [00:23<00:05, 16.58it/s] 81%|████████  | 389/480 [00:24<00:05, 17.45it/s] 85%|████████▌ | 409/480 [00:25<00:04, 16.66it/s] 86%|████████▌ | 413/480 [00:25<00:03, 17.52it/s] 90%|█████████ | 433/480 [00:26<00:02, 16.62it/s] 91%|█████████ | 437/480 [00:26<00:02, 17.49it/s] 95%|█████████▌| 457/480 [00:28<00:01, 16.65it/s] 96%|█████████▌| 461/480 [00:28<00:01, 17.52it/s]100%|██████████| 480/480 [00:28<00:00, 16.90it/s]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     480       
+Failed requests:                         0         
+Maximum request concurrency:             24        
+Benchmark duration (s):                  28.39     
+Total input tokens:                      38471     
+Total generated tokens:                  122880    
+Request throughput (req/s):              16.90     
+Output token throughput (tok/s):         4327.63   
+Peak output token throughput (tok/s):    4560.00   
+Peak concurrent requests:                48.00     
+Total token throughput (tok/s):          5682.52   
+---------------Time to First Token----------------
+Mean TTFT (ms):                          46.69     
+Median TTFT (ms):                        48.80     
+P99 TTFT (ms):                           78.60     
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          5.38      
+Median TPOT (ms):                        5.37      
+P99 TPOT (ms):                           5.50      
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           5.38      
+Median ITL (ms):                         5.34      
+P99 ITL (ms):                            6.13      
+==================================================
