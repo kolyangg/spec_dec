@@ -30,3 +30,5 @@ output/checkpoints/*
 # Local machine/server configuration.
 .env
 *.log
+
+CHAT_HISTORY.md
