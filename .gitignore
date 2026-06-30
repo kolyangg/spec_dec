@@ -31,4 +31,4 @@ output/checkpoints/*
 .env
 *.log
 
-CHAT_HISTORY.md
+CHAT_HISTORY.MD
